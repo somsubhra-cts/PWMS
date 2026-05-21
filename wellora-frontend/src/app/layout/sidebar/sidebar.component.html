@@ -1,0 +1,30 @@
+<aside class="pwms-sidebar">
+  <div class="sidebar-section-label">
+    {{ auth.role() === 'ADMIN' ? 'Admin Panel' : 'Patient Portal' }}
+  </div>
+
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.route; let i = $index) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item anim-fade-left"
+        [class.delay-{{i+1}}]="true"
+        [style.animation-delay]="(i * 0.06) + 's'"
+        [title]="item.label">
+        <div class="nav-icon">
+          <i [class]="item.icon"></i>
+        </div>
+        <span class="nav-label">{{ item.label }}</span>
+        <div class="nav-indicator"></div>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="health-tip">
+      <i class="fas fa-leaf"></i>
+      <span>Stay consistent with your wellness goals</span>
+    </div>
+  </div>
+</aside>

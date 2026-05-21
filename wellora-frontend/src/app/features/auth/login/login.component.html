@@ -1,0 +1,171 @@
+<div class="login-page">
+  <!-- Animated background particles -->
+  <div class="bg-particles">
+    @for (p of [1,2,3,4,5,6,7,8]; track p) {
+      <div class="particle" [style.animation-delay]="(p*0.5)+'s'" [style.left]="(p*12)+'%'"></div>
+    }
+  </div>
+
+  <!-- Left panel -->
+  <div class="login-left anim-fade-left">
+    <div class="left-content">
+      <div class="brand-logo">
+        <div class="logo-icon">
+          <i class="fas fa-heartbeat"></i>
+        </div>
+        <h1 class="logo-title">Wellora</h1>
+      </div>
+
+      <h2 class="left-heading">Patient Wellness<br><span class="gradient-text">Monitoring System</span></h2>
+      <p class="left-sub">A comprehensive platform to manage patient wellness plans, track daily activity progress, and generate insightful health reports.</p>
+
+      <div class="feature-list">
+        @for (f of features; track f.label; let i = $index) {
+          <div class="feature-item anim-fade-left" [style.animation-delay]="(i*0.1+0.3)+'s'">
+            <div class="feature-icon"><i [class]="f.icon"></i></div>
+            <div>
+              <div class="feature-label">{{ f.label }}</div>
+              <div class="feature-desc">{{ f.desc }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel — form -->
+  <div class="login-right anim-fade-right">
+    <div class="login-card">
+
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab" [class.active]="tab()==='login'" (click)="tab.set('login')">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+        <button class="auth-tab" [class.active]="tab()==='register'" (click)="tab.set('register')">
+          <i class="fas fa-user-plus"></i> Register
+        </button>
+      </div>
+
+      @if (tab() === 'login') {
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-user-shield"></i></div>
+          <h2>Welcome Back</h2>
+          <p>Sign in to your Wellora account</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="login-form">
+          <div class="form-group">
+            <label>Username</label>
+            <div class="input-wrapper">
+              <i class="fas fa-user input-icon"></i>
+              <input class="pwms-input" type="text" placeholder="Enter your username"
+                [value]="username()" (input)="username.set($any($event.target).value)"
+                autocomplete="username" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input class="pwms-input" [type]="showPass() ? 'text' : 'password'"
+                placeholder="Enter your password"
+                [value]="password()" (input)="password.set($any($event.target).value)"
+                autocomplete="current-password" />
+              <button type="button" class="eye-btn" (click)="showPass.set(!showPass())">
+                <i [class]="showPass() ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary login-btn" [disabled]="loading()">
+            @if (loading()) { <span class="spinner"></span> Signing in...
+            } @else { <i class="fas fa-sign-in-alt"></i> Sign In }
+          </button>
+        </form>
+
+        <div class="role-hint">
+          <div class="role-badge admin-role"><i class="fas fa-user-tie"></i> Admin</div>
+          <span>or</span>
+          <div class="role-badge patient-role"><i class="fas fa-user"></i> Patient</div>
+          <span>— role detected from credentials</span>
+        </div>
+      }
+
+      @if (tab() === 'register') {
+        <div class="card-header">
+          <div class="card-icon"><i class="fas fa-user-plus"></i></div>
+          <h2>Create Account</h2>
+          <p>Patient self-registration</p>
+        </div>
+
+        <form (ngSubmit)="onRegister()" class="login-form">
+          <!-- Step 1: Patient ID — issued by admin -->
+          <div class="form-group">
+            <label>Patient ID <span class="hint-text">(provided by your admin)</span></label>
+            <div class="input-wrapper">
+              <i class="fas fa-id-card input-icon"></i>
+              <input class="pwms-input" type="number" placeholder="e.g. 1001"
+                [value]="regReferenceId()" (input)="regReferenceId.set($any($event.target).value)" />
+            </div>
+          </div>
+
+          <!-- Step 2: Registered email — identity verification -->
+          <div class="form-group">
+            <label>Registered Email <span class="hint-text">(the email your doctor has on file)</span></label>
+            <div class="input-wrapper">
+              <i class="fas fa-envelope input-icon"></i>
+              <input class="pwms-input" type="email" placeholder="e.g. john@example.com"
+                [value]="regEmail()" (input)="regEmail.set($any($event.target).value)"
+                autocomplete="email" />
+            </div>
+          </div>
+
+          <!-- Step 3: Choose credentials -->
+          <div class="form-group">
+            <label>Username</label>
+            <div class="input-wrapper">
+              <i class="fas fa-user input-icon"></i>
+              <input class="pwms-input" type="text" placeholder="Choose a username"
+                [value]="regUsername()" (input)="regUsername.set($any($event.target).value)"
+                autocomplete="username" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input class="pwms-input" [type]="showRegPass() ? 'text' : 'password'"
+                placeholder="Create a password"
+                [value]="regPassword()" (input)="regPassword.set($any($event.target).value)"
+                autocomplete="new-password" />
+              <button type="button" class="eye-btn" (click)="showRegPass.set(!showRegPass())">
+                <i [class]="showRegPass() ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input class="pwms-input" type="password" placeholder="Confirm your password"
+                [value]="regConfirm()" (input)="regConfirm.set($any($event.target).value)"
+                autocomplete="new-password" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary login-btn" [disabled]="regLoading()">
+            @if (regLoading()) { <span class="spinner"></span> Verifying &amp; creating account...
+            } @else { <i class="fas fa-user-plus"></i> Create Account }
+          </button>
+        </form>
+
+        <p class="reg-note">
+          <i class="fas fa-info-circle"></i>
+          Your Patient ID and registered email are assigned by your admin when your profile is created.
+          Use exactly the email your doctor entered for you.
+        </p>
+      }
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+.form-card { padding: 32px; max-width: 720px; }
+.form-card-header { display:flex; align-items:center; gap:16px; margin-bottom:24px;
+  h2{font-family:'Poppins',sans-serif;font-size:1.1rem;font-weight:700;} p{color:var(--text-secondary);font-size:0.85rem;} }
+.form-icon { width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--primary-blue));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;box-shadow:0 4px 14px rgba(99,102,241,0.35);flex-shrink:0; }
+.form-row { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+@media(max-width:600px){.form-row{grid-template-columns:1fr;}}
+.patient-form { display:flex;flex-direction:column;gap:20px; }
+.form-actions { display:flex;justify-content:flex-end;gap:12px;padding-top:8px; }
+.req { color:var(--danger); } .opt { color:var(--text-muted);font-size:0.75rem;font-weight:400; }
+.spinner { width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block; }
+@keyframes spin{to{transform:rotate(360deg);}}

@@ -1,0 +1,66 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Progress <span class="gradient-text">History</span></h1>
+      <p>Review your past activity completion records</p>
+    </div>
+  </div>
+
+  <div class="pwms-card filter-card anim-fade-up delay-1">
+    <div class="filter-grid">
+      <div class="form-group">
+        <label>Wellness Plan</label>
+        <select class="pwms-input" [value]="selPlan()" (change)="selPlan.set(+$any($event.target).value||null)">
+          <option value="">— All plans —</option>
+          @for (a of assignments(); track a.planId) {
+            <option [value]="a.planId">{{ a.planName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input class="pwms-input" type="date" [value]="selDate()" (change)="selDate.set($any($event.target).value)" />
+      </div>
+      <div class="form-group filter-action">
+        <label>&nbsp;</label>
+        <button class="btn-primary" (click)="search()" [disabled]="loading()">
+          <i class="fas fa-search"></i> Search History
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton" style="height:200px;border-radius:20px;margin-top:20px;"></div>
+  } @else if (searched() && records().length === 0) {
+    <div class="empty-state mt-24">
+      <i class="fas fa-calendar empty-icon"></i>
+      <h3>No records found</h3>
+      <p>Try a different date or plan filter</p>
+    </div>
+  } @else if (records().length > 0) {
+    <div class="history-list mt-24">
+      @for (date of groupedDates; track date; let i = $index) {
+        <div class="day-group anim-fade-up" [style.animation-delay]="(i*0.08)+'s'">
+          <div class="day-header">
+            <div class="day-date"><i class="fas fa-calendar-day"></i> {{ date }}</div>
+            <div class="day-stats">
+              <span class="ds-done"><i class="fas fa-check"></i> {{ doneCount(grouped.get(date)!) }}</span>
+              <span class="ds-skip"><i class="fas fa-forward"></i> {{ skippedCount(grouped.get(date)!) }}</span>
+              <span class="ds-pct">{{ pct(grouped.get(date)!) }}% done</span>
+            </div>
+          </div>
+          <div class="day-activities">
+            @for (r of grouped.get(date)!; track r.progressId; let j = $index) {
+              <div class="hist-row anim-fade-up" [class]="'hs-' + r.status.toLowerCase()" [style.animation-delay]="(j*0.05)+'s'">
+                <i [class]="statusIcon(r.status)" [class.text-success]="r.status==='DONE'" [class.text-muted]="r.status==='SKIPPED'" [class.text-warning]="r.status==='PENDING'"></i>
+                <span class="hist-name">{{ r.activityName }}</span>
+                <span [class]="'chip-' + r.status.toLowerCase()">{{ r.status }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

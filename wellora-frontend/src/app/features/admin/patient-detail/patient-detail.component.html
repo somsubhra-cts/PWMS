@@ -1,0 +1,106 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Patient <span class="gradient-text">Profile</span></h1>
+      <p>View and manage patient information and plan assignments</p>
+    </div>
+    <div class="d-flex gap-12">
+      <a routerLink="/admin/patients" class="btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+      @if (patient()) {
+        <a [routerLink]="['/admin/patients', patientId, 'edit']" class="btn-primary">
+          <i class="fas fa-edit"></i> Edit
+        </a>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton" style="height:200px;border-radius:20px;"></div>
+  } @else if (patient()) {
+    <div class="pwms-card profile-card anim-scale-in">
+      <div class="profile-avatar">{{ initials(patient()!.patientName) }}</div>
+      <div class="profile-info">
+        <h2>{{ patient()!.patientName }}</h2>
+        <p class="text-secondary-c">{{ patient()!.email }}</p>
+        <div class="profile-meta">
+          <span class="meta-chip"><i class="fas fa-birthday-cake"></i> {{ patient()!.age }} years</span>
+          <span class="meta-chip"><i class="fas fa-id-badge"></i> ID: {{ patient()!.patientId }}</span>
+          <span class="chip-patient">Patient</span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <a [routerLink]="['/admin/progress']" [queryParams]="{patientId: patient()!.patientId}" class="btn-cyan btn-sm">
+          <i class="fas fa-chart-line"></i> View Progress
+        </a>
+        <a [routerLink]="['/admin/reports']" [queryParams]="{patientId: patient()!.patientId}" class="btn-outline btn-sm">
+          <i class="fas fa-file-medical"></i> Reports
+        </a>
+      </div>
+    </div>
+
+    @if (patient()!.medicalHistory) {
+      <div class="pwms-card info-card anim-fade-up delay-2">
+        <h3 class="section-title"><i class="fas fa-notes-medical"></i> Medical History</h3>
+        <p class="medical-text">{{ patient()!.medicalHistory }}</p>
+      </div>
+    }
+
+    <div class="pwms-card info-card anim-fade-up delay-3">
+      <div class="section-header">
+        <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Wellness Plan Assignments</h3>
+        <button class="btn-primary btn-sm" (click)="openAssignModal()">
+          <i class="fas fa-plus"></i> Assign Plan
+        </button>
+      </div>
+
+      @if (assignments().length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-clipboard-list empty-icon"></i>
+          <h3>No plans assigned yet</h3>
+          <p>Click "Assign Plan" to get started</p>
+        </div>
+      } @else {
+        <div class="assignment-list">
+          @for (a of assignments(); track a.assignmentId; let i = $index) {
+            <div class="assignment-row anim-fade-up" [style.animation-delay]="(i*0.07)+'s'">
+              <div class="assign-icon"><i class="fas fa-clipboard-check"></i></div>
+              <div class="assign-info">
+                <span class="assign-name">{{ a.planName }}</span>
+                <span class="assign-date text-muted fs-sm">Assigned: {{ a.assignedDate }}</span>
+              </div>
+              <span [class]="'chip-' + a.status.toLowerCase()">{{ a.status }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><i class="fas fa-plus-circle" style="color:var(--teal);margin-right:8px;"></i> Assign Wellness Plan</h2>
+        <button class="btn-icon" (click)="showModal.set(false)"><i class="fas fa-times"></i></button>
+      </div>
+      <p class="text-secondary-c fs-sm mb-16">Select a plan to assign to <strong>{{ patient()?.patientName }}</strong></p>
+      <div class="form-group">
+        <label>Wellness Plan</label>
+        <select class="pwms-input" [value]="selectedPlanId()" (change)="selectedPlanId.set(+$any($event.target).value || null)">
+          <option value="">— Choose a plan —</option>
+          @for (plan of allPlans(); track plan.planId) {
+            <option [value]="plan.planId">{{ plan.planName }}</option>
+          }
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="showModal.set(false)">Cancel</button>
+        <button class="btn-cyan" (click)="assignPlan()" [disabled]="assigning() || !selectedPlanId()">
+          @if (assigning()) { <span class="spinner"></span> Assigning… }
+          @else { <i class="fas fa-check"></i> Assign Plan }
+        </button>
+      </div>
+    </div>
+  </div>
+}

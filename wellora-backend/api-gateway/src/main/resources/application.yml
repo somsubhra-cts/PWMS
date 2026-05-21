@@ -1,0 +1,102 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+
+        # ── Auth — login (fully public) ──────────────────────────
+        - id: auth-login
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/login
+            - Method=POST
+
+        # ── Auth — register (public — patient self-registration) ──
+        - id: auth-register
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/register
+            - Method=POST
+
+        # ── Auth — update password (ADMIN + own PATIENT) ─────────
+        - id: auth-update
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/update/**
+            - Method=PUT
+          filters:
+            - name: JwtAuthFilter
+
+        # ── Auth — delete user (ADMIN only) ──────────────────────
+        - id: auth-delete
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/delete/**
+            - Method=DELETE
+          filters:
+            - name: JwtAuthFilter
+
+        # ── Auth — internal endpoints (no filter needed) ─────────
+        - id: auth-internal
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/validate,/auth/role
+
+        # ── Patient service ───────────────────────────────────────
+        - id: patient-service
+          uri: lb://patient-service
+          predicates:
+            - Path=/api/patients/**
+          filters:
+            - name: JwtAuthFilter
+
+        # ── Wellness plan service ─────────────────────────────────
+        - id: wellnessplan-service
+          uri: lb://wellnessplan-service
+          predicates:
+            - Path=/api/plans/**
+          filters:
+            - name: JwtAuthFilter
+
+        # ── Progress service ──────────────────────────────────────
+        - id: progress-service
+          uri: lb://progress-service
+          predicates:
+            - Path=/api/progress/**
+          filters:
+            - name: JwtAuthFilter
+
+        # ── Notification service ──────────────────────────────────
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - name: JwtAuthFilter
+
+        # ── Report service ────────────────────────────────────────
+        - id: report-service
+          uri: lb://report-service
+          predicates:
+            - Path=/api/reports/**
+          filters:
+            - name: JwtAuthFilter
+
+server:
+  port: 8090
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.pwms.gateway: DEBUG

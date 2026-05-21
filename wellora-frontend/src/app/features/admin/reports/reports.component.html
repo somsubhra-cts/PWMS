@@ -1,0 +1,125 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Health <span class="gradient-text">Reports</span></h1>
+      <p>Generate and manage patient wellness reports</p>
+    </div>
+  </div>
+
+  <div class="pwms-card filter-card anim-fade-up delay-1">
+    <div class="filter-grid">
+      <div class="form-group">
+        <label>Patient</label>
+        <select class="pwms-input" [value]="selPatient()"
+          (change)="selPatient.set(+$any($event.target).value||null); onPatientChange()">
+          <option value="">— Select patient —</option>
+          @for (p of patients(); track p.patientId) {
+            <option [value]="p.patientId">{{ p.patientName }} (#{{ p.patientId }})</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Wellness Plan</label>
+        <select class="pwms-input" [value]="selPlan()"
+          (change)="selPlan.set(+$any($event.target).value||null)">
+          <option value="">— Select plan —</option>
+          @for (a of assignments(); track a.planId) {
+            <option [value]="a.planId">{{ a.planName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter-action">
+        <label>&nbsp;</label>
+        <button class="btn-cyan" (click)="loadPreview()" [disabled]="previewing()||!selPatient()||!selPlan()">
+          @if (previewing()) { <span class="spinner"></span> Loading… }
+          @else { <i class="fas fa-eye"></i> Preview & Generate }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton" style="height:200px;border-radius:20px;margin-top:20px;"></div>
+  } @else if (reports().length === 0 && selPatient()) {
+    <div class="empty-state mt-24">
+      <i class="fas fa-file-alt empty-icon"></i>
+      <h3>No reports generated yet</h3>
+      <p>Use the preview & generate button to create a report</p>
+    </div>
+  } @else if (reports().length > 0) {
+    <div class="reports-grid">
+      @for (r of reports(); track r.reportId; let i = $index) {
+        <div class="report-card pwms-card anim-fade-up" [style.animation-delay]="(i*0.07)+'s'">
+          <div class="report-ring-wrap">
+            <svg width="80" height="80" viewBox="0 0 110 110">
+              <circle class="progress-ring-track" cx="55" cy="55" r="45" stroke-width="10"/>
+              <circle class="progress-ring-fill" cx="55" cy="55" r="45" stroke-width="10"
+                [attr.stroke]="ringColor(r.completionPercentage)"
+                [attr.stroke-dasharray]="circumference"
+                [attr.stroke-dashoffset]="dashOffset(r.completionPercentage)"/>
+            </svg>
+            <div class="rr-label">
+              <span class="rr-pct">{{ r.completionPercentage | number:'1.0-0' }}%</span>
+            </div>
+          </div>
+
+          <div class="report-body">
+            <div class="report-top">
+              <h3>{{ r.planName }}</h3>
+              <span [class]="'chip-' + r.status.toLowerCase()">{{ r.status }}</span>
+            </div>
+            <p class="report-patient"><i class="fas fa-user"></i> {{ r.patientName }}</p>
+            <p class="report-date text-muted fs-sm"><i class="fas fa-calendar"></i> {{ formatDate(r.date) }}</p>
+            <p class="report-summary text-secondary-c fs-sm">{{ r.adminSummary || r.summary }}</p>
+            <div class="report-stats">
+              <span class="rstat"><i class="fas fa-tasks" style="color:var(--cyan)"></i> {{ r.completedActivities }}/{{ r.totalActivities }} completed</span>
+            </div>
+          </div>
+
+          <button class="btn-outline btn-sm download-btn"
+            (click)="download(r.reportId)"
+            [disabled]="downloading()===r.reportId">
+            @if (downloading()===r.reportId) { <span class="spinner-sm"></span> }
+            @else { <i class="fas fa-download"></i> }
+            PDF
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showGenModal() && preview()) {
+  <div class="modal-overlay" (click)="showGenModal.set(false)">
+    <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><i class="fas fa-file-medical" style="color:var(--teal);margin-right:8px;"></i> Report Preview</h2>
+        <button class="btn-icon" (click)="showGenModal.set(false)"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="preview-grid">
+        <div class="preview-stat"><span class="ps-val">{{ preview()!.patientName }}</span><span class="ps-lbl">Patient</span></div>
+        <div class="preview-stat"><span class="ps-val">{{ preview()!.planName }}</span><span class="ps-lbl">Plan</span></div>
+        <div class="preview-stat"><span class="ps-val text-success">{{ preview()!.completedActivities }}/{{ preview()!.totalActivities }}</span><span class="ps-lbl">Activities Done</span></div>
+        <div class="preview-stat"><span class="ps-val" [style.color]="ringColor(preview()!.completionPercentage)">{{ preview()!.completionPercentage | number:'1.0-0' }}%</span><span class="ps-lbl">Completion</span></div>
+      </div>
+
+      <p class="text-muted fs-sm mb-16" style="margin-top:4px;"><i class="fas fa-calendar"></i> {{ preview()!.dateRange }}</p>
+
+      <div class="form-group">
+        <label>Admin Summary <span style="color:var(--text-muted);font-size:0.75rem;font-weight:400">(optional)</span></label>
+        <textarea class="pwms-textarea" [value]="adminSummary()"
+          (input)="adminSummary.set($any($event.target).value)"
+          placeholder="Write your clinical assessment and recommendations…" rows="4"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="showGenModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="generate()" [disabled]="generating()">
+          @if (generating()) { <span class="spinner"></span> Generating… }
+          @else { <i class="fas fa-file-medical"></i> Generate & Publish }
+        </button>
+      </div>
+    </div>
+  </div>
+}

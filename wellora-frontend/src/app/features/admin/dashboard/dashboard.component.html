@@ -1,0 +1,134 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Admin <span class="gradient-text">Dashboard</span></h1>
+      <p>Overview of patients, plans, and system activity</p>
+    </div>
+    <a routerLink="/admin/patients/new" class="btn-primary">
+      <i class="fas fa-plus"></i> Add Patient
+    </a>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card pwms-card anim-fade-up delay-1">
+      <div class="stat-icon purple"><i class="fas fa-users"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ totalPatients }}</div>
+        <div class="stat-label">Total Patients</div>
+      </div>
+      <a routerLink="/admin/patients" class="stat-link"><i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="stat-card pwms-card anim-fade-up delay-2">
+      <div class="stat-icon blue"><i class="fas fa-clipboard-list"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ totalPlans }}</div>
+        <div class="stat-label">Wellness Plans</div>
+      </div>
+      <a routerLink="/admin/plans" class="stat-link"><i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="stat-card pwms-card anim-fade-up delay-3">
+      <div class="stat-icon teal"><i class="fas fa-bell"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ notifSvc.unreadCount() }}</div>
+        <div class="stat-label">Unread Notifications</div>
+      </div>
+      <a routerLink="/admin/notifications" class="stat-link"><i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="stat-card pwms-card anim-fade-up delay-4">
+      <div class="stat-icon cyan"><i class="fas fa-file-medical"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ totalPatients }}</div>
+        <div class="stat-label">Active Members</div>
+      </div>
+      <a routerLink="/admin/reports" class="stat-link"><i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="pwms-card dash-panel anim-fade-up delay-5">
+      <div class="panel-header">
+        <h3><i class="fas fa-users"></i> Recent Patients</h3>
+        <a routerLink="/admin/patients" class="view-all">View all</a>
+      </div>
+      @if (recentPatients.length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-users empty-icon"></i>
+          <h3>No patients yet</h3>
+          <p>Add your first patient to get started</p>
+        </div>
+      } @else {
+        <div class="patient-list">
+          @for (p of recentPatients; track p.patientId; let i = $index) {
+            <a [routerLink]="['/admin/patients', p.patientId]" class="patient-row anim-fade-up" [style.animation-delay]="(i*0.07)+'s'">
+              <div class="patient-avatar">{{ p.patientName[0].toUpperCase() }}</div>
+              <div class="patient-info">
+                <span class="patient-name">{{ p.patientName }}</span>
+                <span class="patient-meta">Age {{ p.age }} · {{ p.email }}</span>
+              </div>
+              <span class="chip-patient">Patient</span>
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="pwms-card dash-panel anim-fade-up delay-6">
+      <div class="panel-header">
+        <h3><i class="fas fa-bell"></i> Recent Notifications</h3>
+        <a routerLink="/admin/notifications" class="view-all">View all</a>
+      </div>
+      @if (loading()) {
+        <div class="skeleton-list">
+          @for (s of [1,2,3]; track s) {
+            <div class="skeleton" style="height:56px;margin-bottom:10px;"></div>
+          }
+        </div>
+      } @else if (recentNotifications.length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-bell empty-icon"></i>
+          <h3>No notifications</h3>
+        </div>
+      } @else {
+        <div class="notif-list">
+          @for (n of recentNotifications; track n.notificationId; let i = $index) {
+            <div class="notif-row anim-fade-up" [class.unread]="!n.isRead" [style.animation-delay]="(i*0.07)+'s'">
+              <div class="notif-icon-wrap" [class]="'notif-' + notifColor(n.notificationType)">
+                <i [class]="notifIcon(n.notificationType)"></i>
+              </div>
+              <div class="notif-body">
+                <p class="notif-msg">{{ n.message }}</p>
+                <span class="notif-time">{{ formatDate(n.createdAt) }}</span>
+              </div>
+              @if (!n.isRead) { <span class="notif-dot"></span> }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="quick-actions anim-fade-up delay-7">
+    <p class="section-title"><i class="fas fa-bolt"></i> Quick Actions</p>
+    <div class="actions-grid">
+      <a routerLink="/admin/patients/new" class="action-card">
+        <i class="fas fa-user-plus"></i>
+        <span>Add Patient</span>
+      </a>
+      <a routerLink="/admin/plans/new" class="action-card">
+        <i class="fas fa-plus-circle"></i>
+        <span>Create Plan</span>
+      </a>
+      <a routerLink="/admin/progress" class="action-card">
+        <i class="fas fa-chart-line"></i>
+        <span>View Progress</span>
+      </a>
+      <a routerLink="/admin/reports" class="action-card">
+        <i class="fas fa-file-medical"></i>
+        <span>Manage Reports</span>
+      </a>
+    </div>
+  </div>
+</div>

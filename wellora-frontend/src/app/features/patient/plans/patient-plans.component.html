@@ -1,0 +1,94 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>My Wellness <span class="gradient-text">Plans</span></h1>
+      <p>{{ activePlans.length }} active · {{ inactivePlans.length }} inactive</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="plans-grid">
+      @for (s of [1,2,3]; track s) {
+        <div class="skeleton" style="height:200px;border-radius:20px;"></div>
+      }
+    </div>
+  } @else if (assignments().length === 0) {
+    <div class="empty-state">
+      <i class="fas fa-clipboard-list empty-icon"></i>
+      <h3>No plans assigned yet</h3>
+      <p>Your wellness plans will appear here once assigned by your admin</p>
+    </div>
+  } @else {
+    @if (activePlans.length > 0) {
+      <p class="section-title"><i class="fas fa-circle-check" style="color:var(--success)"></i> Active Plans</p>
+      <div class="plans-grid mb-24">
+        @for (a of activePlans; track a.assignmentId; let i = $index) {
+          <div class="plan-card pwms-card anim-fade-up" [style.animation-delay]="(i*0.08)+'s'">
+            <div class="plan-top">
+              <div class="plan-icon active-icon"><i class="fas fa-clipboard-check"></i></div>
+              <div class="plan-title-wrap">
+                <h3>{{ a.planName }}</h3>
+                <span class="chip-active">Active</span>
+              </div>
+            </div>
+
+            <div class="plan-meta">
+              <span class="meta-item"><i class="fas fa-calendar-alt"></i> Since {{ a.assignedDate }}</span>
+              <span class="meta-item"><i class="fas fa-id-badge"></i> Plan #{{ a.planId }}</span>
+            </div>
+
+            @if (summary(a.planId)) {
+              <div class="plan-progress">
+                <div class="ring-wrap">
+                  <svg width="64" height="64" viewBox="0 0 110 110">
+                    <circle class="progress-ring-track" cx="55" cy="55" r="45" stroke-width="12"/>
+                    <circle class="progress-ring-fill" cx="55" cy="55" r="45" stroke-width="12"
+                      [attr.stroke]="ringColor(summary(a.planId)!.completionPercentage)"
+                      [attr.stroke-dasharray]="circumference"
+                      [attr.stroke-dashoffset]="dashOffset(summary(a.planId)!.completionPercentage)"/>
+                  </svg>
+                  <div class="ring-center">
+                    <span class="ring-pct">{{ summary(a.planId)!.completionPercentage | number:'1.0-0' }}%</span>
+                  </div>
+                </div>
+                <div class="progress-info">
+                  <span class="prog-done text-success fw-600">{{ summary(a.planId)!.completedActivities }} done</span>
+                  <span class="prog-total text-muted fs-sm">of {{ summary(a.planId)!.totalActivities }} activities today</span>
+                </div>
+              </div>
+            }
+
+            <div class="plan-footer">
+              <a routerLink="/patient/progress" [queryParams]="{planId: a.planId}" class="btn-primary btn-sm">
+                <i class="fas fa-tasks"></i> Today's Activities
+              </a>
+              <a routerLink="/patient/history" [queryParams]="{planId: a.planId}" class="btn-outline btn-sm">
+                <i class="fas fa-history"></i> History
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (inactivePlans.length > 0) {
+      <p class="section-title"><i class="fas fa-archive" style="color:var(--text-muted)"></i> Past Plans</p>
+      <div class="plans-grid">
+        @for (a of inactivePlans; track a.assignmentId; let i = $index) {
+          <div class="plan-card plan-card-inactive pwms-card anim-fade-up" [style.animation-delay]="(i*0.08)+'s'">
+            <div class="plan-top">
+              <div class="plan-icon inactive-icon"><i class="fas fa-clipboard"></i></div>
+              <div class="plan-title-wrap">
+                <h3>{{ a.planName }}</h3>
+                <span class="chip-inactive">Inactive</span>
+              </div>
+            </div>
+            <div class="plan-meta">
+              <span class="meta-item"><i class="fas fa-calendar-alt"></i> {{ a.assignedDate }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

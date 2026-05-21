@@ -1,0 +1,42 @@
+<nav class="pwms-navbar">
+  <div class="navbar-brand">
+    <div class="brand-icon">
+      <i class="fas fa-heartbeat"></i>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">Wellora</span>
+      <span class="brand-sub">Wellness Monitor</span>
+    </div>
+  </div>
+
+  <!-- <div class="navbar-center">
+    <div class="health-pulse">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div> -->
+
+  <div class="navbar-right">
+    <a [routerLink]="notifRoute" class="notif-btn" title="Notifications">
+      <i class="fas fa-bell"></i>
+      @if (unreadCount > 0) {
+        <span class="notif-badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+      }
+    </a>
+
+    <div class="user-chip">
+      <div class="user-avatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="user-info">
+        <span class="user-name">{{ auth.username() }}</span>
+        <span class="user-role" [class.role-admin]="auth.role()==='ADMIN'" [class.role-patient]="auth.role()==='PATIENT'">
+          {{ auth.role() }}
+        </span>
+      </div>
+    </div>
+
+    <button class="logout-btn" (click)="auth.logout()" title="Logout">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+  </div>
+</nav>

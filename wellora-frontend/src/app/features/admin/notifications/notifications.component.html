@@ -1,0 +1,55 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Admin <span class="gradient-text">Notifications</span></h1>
+      <p>{{ unreadCount }} unread · {{ notifications().length }} total</p>
+    </div>
+    @if (unreadCount > 0) {
+      <button class="btn-outline" (click)="markAllRead()">
+        <i class="fas fa-check-double"></i> Mark all read
+      </button>
+    }
+  </div>
+
+  <div class="filter-tabs anim-fade-up delay-1">
+    <button [class.active]="filter()==='ALL'"    (click)="filter.set('ALL')">All <span class="tab-count">{{ notifications().length }}</span></button>
+    <button [class.active]="filter()==='UNREAD'" (click)="filter.set('UNREAD')">Unread <span class="tab-count unread">{{ unreadCount }}</span></button>
+  </div>
+
+  @if (loading()) {
+    <div class="notif-list">
+      @for (s of [1,2,3,4]; track s) {
+        <div class="skeleton" style="height:72px;border-radius:14px;"></div>
+      }
+    </div>
+  } @else if (displayed.length === 0) {
+    <div class="empty-state">
+      <i class="fas fa-bell empty-icon"></i>
+      <h3>{{ filter()==='UNREAD' ? 'No unread notifications' : 'No notifications yet' }}</h3>
+      <p>You're all caught up!</p>
+    </div>
+  } @else {
+    <div class="notif-list">
+      @for (n of displayed; track n.notificationId; let i = $index) {
+        <div class="notif-card anim-fade-up" [class.unread]="!n.isRead"
+          [style.animation-delay]="(i*0.05)+'s'" (click)="markRead(n)">
+          <div class="notif-icon-wrap" [class]="'nc-' + color(n.notificationType)">
+            <i [class]="icon(n.notificationType)"></i>
+          </div>
+          <div class="notif-body">
+            <p class="notif-msg">{{ n.message }}</p>
+            <div class="notif-meta">
+              <span class="notif-type">{{ n.notificationType.replace(/_/g,' ') }}</span>
+              <span class="notif-time"><i class="fas fa-clock"></i> {{ formatDate(n.createdAt) }}</span>
+            </div>
+          </div>
+          @if (!n.isRead) {
+            <div class="unread-dot"></div>
+          } @else {
+            <i class="fas fa-check-circle read-icon"></i>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

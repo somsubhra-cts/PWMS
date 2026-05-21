@@ -1,0 +1,128 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>My <span class="gradient-text">Reports</span></h1>
+      <p>Published wellness reports from your care team</p>
+    </div>
+  </div>
+
+  <div class="report-strip pwms-card anim-fade-up delay-1">
+    <div class="rs-item">
+      <span class="rs-val">{{ totalReports() }}</span>
+      <span class="rs-lbl">Total Reports</span>
+    </div>
+    <div class="rs-divider"></div>
+    <div class="rs-item">
+      <span class="rs-val text-success">{{ totalReports() }}</span>
+      <span class="rs-lbl">Published</span>
+    </div>
+    <div class="rs-divider"></div>
+    <div class="rs-item">
+      <span class="rs-val">{{ latestReport()?.date ?? '—' }}</span>
+      <span class="rs-lbl">Latest</span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="report-grid mt-24">
+      @for (s of [1,2,3]; track s) {
+        <div class="skeleton" style="height:180px;border-radius:16px;"></div>
+      }
+    </div>
+  } @else if (reports().length === 0) {
+    <div class="empty-state mt-24">
+      <i class="fas fa-file-alt empty-icon"></i>
+      <h3>No reports yet</h3>
+      <p>Your care team will publish reports as your wellness plan progresses</p>
+    </div>
+  } @else {
+    <div class="report-grid mt-24">
+      @for (r of reports(); track r.reportId; let i = $index) {
+        <div class="report-card pwms-card anim-fade-up" [style.animation-delay]="(i*0.08)+'s'">
+          <div class="rc-top">
+            <div class="rc-ring">
+              <svg width="70" height="70" viewBox="0 0 80 80">
+                <circle class="progress-ring-track" cx="40" cy="40" r="30" stroke-width="7"/>
+                <circle class="progress-ring-fill" cx="40" cy="40" r="30" stroke-width="7"
+                  [attr.stroke]="'var(--primary-light)'"
+                  [attr.stroke-dasharray]="circumference"
+                  [attr.stroke-dashoffset]="ringOffset(r.completionPercentage)"/>
+              </svg>
+              <div class="rc-ring-label">
+                <span class="rc-pct">{{ r.completionPercentage | number:'1.0-0' }}%</span>
+              </div>
+            </div>
+            <div class="rc-meta">
+              <h3 class="rc-title">Report #{{ r.reportId }}</h3>
+              <span class="rc-date"><i class="fas fa-calendar-alt"></i> {{ r.date }}</span>
+              <span class="rc-plan text-muted fs-sm" *ngIf="r.planName">
+                <i class="fas fa-clipboard-list"></i> {{ r.planName }}
+              </span>
+              <span class="status-chip" [style.background]="statusColor(r.status) + '22'" [style.color]="statusColor(r.status)">
+                {{ r.status }}
+              </span>
+            </div>
+          </div>
+          @if (r.adminSummary) {
+            <p class="rc-notes">{{ r.adminSummary }}</p>
+          }
+          <div class="rc-actions">
+            <button class="btn-ghost" (click)="open(r)">
+              <i class="fas fa-eye"></i> Preview
+            </button>
+            <button class="btn-primary" (click)="download(r)" [disabled]="downloading()===r.reportId">
+              @if (downloading()===r.reportId) {
+                <i class="fas fa-spinner fa-spin"></i> Downloading…
+              } @else {
+                <i class="fas fa-download"></i> Download PDF
+              }
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (selected()) {
+  <div class="modal-backdrop" (click)="close()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fas fa-file-medical"></i> Report #{{ selected()!.reportId }}</h3>
+        <button class="modal-close" (click)="close()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-stats">
+          <div class="ps-item">
+            <span class="ps-val">{{ selected()!.completionPercentage | number:'1.0-0' }}%</span>
+            <span class="ps-lbl">Completion</span>
+          </div>
+          <div class="ps-item">
+            <span class="ps-val">{{ selected()!.totalActivities }}</span>
+            <span class="ps-lbl">Total Activities</span>
+          </div>
+          <div class="ps-item">
+            <span class="ps-val text-success">{{ selected()!.completedActivities }}</span>
+            <span class="ps-lbl">Completed</span>
+          </div>
+          <div class="ps-item">
+            <span class="ps-val">{{ selected()!.date }}</span>
+            <span class="ps-lbl">Date</span>
+          </div>
+        </div>
+        @if (selected()!.adminSummary) {
+          <div class="preview-notes">
+            <h4><i class="fas fa-sticky-note"></i> Admin Notes</h4>
+            <p>{{ selected()!.adminSummary }}</p>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" (click)="close()">Close</button>
+        <button class="btn-primary" (click)="download(selected()!)" [disabled]="downloading()===selected()!.reportId">
+          <i class="fas fa-download"></i> Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+}

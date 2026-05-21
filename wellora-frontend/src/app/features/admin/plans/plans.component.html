@@ -1,0 +1,107 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Wellness <span class="gradient-text">Plans</span></h1>
+      <p>{{ plans().length }} plans available</p>
+    </div>
+    <button class="btn-primary" (click)="openCreate()">
+      <i class="fas fa-plus"></i> Create Plan
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="plans-grid">
+      @for (s of [1,2,3]; track s) {
+        <div class="skeleton" style="height:180px;border-radius:20px;"></div>
+      }
+    </div>
+  } @else if (plans().length === 0) {
+    <div class="empty-state">
+      <i class="fas fa-clipboard-list empty-icon"></i>
+      <h3>No wellness plans yet</h3>
+      <p>Create your first plan to assign to patients</p>
+    </div>
+  } @else {
+    <div class="plans-grid">
+      @for (plan of plans(); track plan.planId; let i = $index) {
+        <div class="plan-card pwms-card anim-fade-up" [style.animation-delay]="(i*0.07)+'s'">
+          <div class="plan-top">
+            <div class="plan-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="plan-meta">
+              <h3>{{ plan.planName }}</h3>
+              <span class="chip-info">{{ plan.activities.length }} activities</span>
+            </div>
+            <div class="plan-actions">
+              <button class="btn-icon" title="Edit" (click)="openEdit(plan)"><i class="fas fa-edit"></i></button>
+              <button class="btn-icon" title="Delete" (click)="delete(plan.planId, plan.planName)" [disabled]="deleting()===plan.planId">
+                <i class="fas fa-trash" style="color:var(--danger)"></i>
+              </button>
+            </div>
+          </div>
+
+          <button class="expand-btn" (click)="toggle(plan.planId)">
+            <span>{{ expandedId()===plan.planId ? 'Hide' : 'Show' }} activities</span>
+            <i [class]="expandedId()===plan.planId ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+          </button>
+
+          @if (expandedId() === plan.planId) {
+            <div class="activity-list anim-fade-up">
+              @for (act of plan.activities; track act.activityId; let j = $index) {
+                <div class="activity-item" [style.animation-delay]="(j*0.05)+'s'">
+                  <span class="activity-num">{{ j+1 }}</span>
+                  <span class="activity-name">{{ act.activityName }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><i class="fas fa-clipboard-list" style="color:var(--teal);margin-right:8px;"></i>
+          {{ editPlan() ? 'Edit Plan' : 'Create Wellness Plan' }}</h2>
+        <button class="btn-icon" (click)="showModal.set(false)"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="form-group mb-16">
+        <label>Plan Name</label>
+        <input class="pwms-input" type="text" [(ngModel)]="form.planName" placeholder="e.g. Diabetes Recovery Plan" />
+      </div>
+
+      <div class="form-group mb-16">
+        <label>Activities</label>
+        <div class="activity-input-row">
+          <input class="pwms-input" type="text" [(ngModel)]="newActivity"
+            placeholder="e.g. 30 minutes morning walk"
+            (keyup.enter)="addActivity()" />
+          <button class="btn-cyan" (click)="addActivity()"><i class="fas fa-plus"></i> Add</button>
+        </div>
+        <div class="added-activities mt-8">
+          @for (act of form.activityNames; track $index; let i = $index) {
+            <div class="added-activity-tag">
+              <span>{{ act }}</span>
+              <button (click)="removeActivity(i)"><i class="fas fa-times"></i></button>
+            </div>
+          }
+          @if (form.activityNames.length === 0) {
+            <p class="text-muted fs-sm">No activities added yet. Add at least one.</p>
+          }
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-outline" (click)="showModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="save()" [disabled]="saving()">
+          @if (saving()) { <span class="spinner"></span> Saving… }
+          @else { <i class="fas fa-save"></i> {{ editPlan() ? 'Update Plan' : 'Create Plan' }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}

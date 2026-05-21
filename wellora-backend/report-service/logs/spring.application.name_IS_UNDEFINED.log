@@ -1,0 +1,56 @@
+2026-04-08 23:10:34 [main] INFO  c.p.r.c.ReportControllerTest - Starting ReportControllerTest using Java 21 with PID 30596 (started by 2486128 in C:\DemoWork\Project Work\pwms-parent\report-service)
+2026-04-08 23:10:34 [main] DEBUG c.p.r.c.ReportControllerTest - Running with Spring Boot v3.3.5, Spring v6.1.14
+2026-04-08 23:10:34 [main] INFO  c.p.r.c.ReportControllerTest - No active profile set, falling back to 1 default profile: "default"
+2026-04-08 23:10:38 [main] INFO  c.p.r.c.ReportControllerTest - Started ReportControllerTest in 5.268 seconds (process running for 6.798)
+2026-04-08 23:10:39 [main] INFO  c.p.r.i.ReportRepositoryIntegrationTest - Starting ReportRepositoryIntegrationTest using Java 21 with PID 30596 (started by 2486128 in C:\DemoWork\Project Work\pwms-parent\report-service)
+2026-04-08 23:10:39 [main] DEBUG c.p.r.i.ReportRepositoryIntegrationTest - Running with Spring Boot v3.3.5, Spring v6.1.14
+2026-04-08 23:10:39 [main] INFO  c.p.r.i.ReportRepositoryIntegrationTest - The following 1 profile is active: "test"
+2026-04-08 23:10:40 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-08 23:10:41 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-04-08 23:10:41 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-08 23:10:41 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-08 23:10:42 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-08 23:10:42 [main] INFO  c.p.r.i.ReportRepositoryIntegrationTest - Started ReportRepositoryIntegrationTest in 3.253 seconds (process running for 10.807)
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Generating PDF for reportId: 1
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Fetching report id: 1
+2026-04-08 23:10:44 [main] INFO  c.pwms.report.service.ReportService - PDF generated for reportId: 1 size: 3 bytes
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Fetching published reports for patientId: 1
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Fetching report id: 99
+2026-04-08 23:10:44 [main] WARN  c.pwms.report.service.ReportService - Report not found: 99
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Fetching report id: 1
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Generating report — patientId: 1 planId: 1 adminId: 1
+2026-04-08 23:10:44 [main] INFO  c.pwms.report.service.ReportService - Report generated — id: 1 patientId: 1 planId: 1
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Patient 1 notified — report shared
+2026-04-08 23:10:44 [main] INFO  c.pwms.report.service.ReportService - Appointment reminder sent — patientId: 1
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Loading report preview — patientId: 1 planId: 1
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Preview loaded — patient: Ashok plan: Weight Loss completion: 66.67%
+2026-04-08 23:10:44 [main] DEBUG c.pwms.report.service.ReportService - Fetching published reports for patientId: 99
+2026-04-08 23:10:44 [main] WARN  c.pwms.report.service.ReportService - No published reports for patientId: 99
+2026-04-08 23:11:49 [main] INFO  c.p.r.c.ReportControllerTest - Starting ReportControllerTest using Java 21 with PID 37040 (started by 2486128 in C:\DemoWork\Project Work\pwms-parent\report-service)
+2026-04-08 23:11:49 [main] DEBUG c.p.r.c.ReportControllerTest - Running with Spring Boot v3.3.5, Spring v6.1.14
+2026-04-08 23:11:49 [main] INFO  c.p.r.c.ReportControllerTest - No active profile set, falling back to 1 default profile: "default"
+2026-04-08 23:11:52 [main] INFO  c.p.r.c.ReportControllerTest - Started ReportControllerTest in 3.765 seconds (process running for 5.045)
+2026-04-08 23:11:53 [main] INFO  c.p.r.i.ReportRepositoryIntegrationTest - Starting ReportRepositoryIntegrationTest using Java 21 with PID 37040 (started by 2486128 in C:\DemoWork\Project Work\pwms-parent\report-service)
+2026-04-08 23:11:53 [main] DEBUG c.p.r.i.ReportRepositoryIntegrationTest - Running with Spring Boot v3.3.5, Spring v6.1.14
+2026-04-08 23:11:53 [main] INFO  c.p.r.i.ReportRepositoryIntegrationTest - The following 1 profile is active: "test"
+2026-04-08 23:11:54 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-08 23:11:54 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-04-08 23:11:54 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-08 23:11:54 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-08 23:11:55 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-08 23:11:56 [main] INFO  c.p.r.i.ReportRepositoryIntegrationTest - Started ReportRepositoryIntegrationTest in 2.668 seconds (process running for 8.307)
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Generating PDF for reportId: 1
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Fetching report id: 1
+2026-04-08 23:11:57 [main] INFO  c.pwms.report.service.ReportService - PDF generated for reportId: 1 size: 3 bytes
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Fetching published reports for patientId: 1
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Fetching report id: 99
+2026-04-08 23:11:57 [main] WARN  c.pwms.report.service.ReportService - Report not found: 99
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Fetching report id: 1
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Generating report — patientId: 1 planId: 1 adminId: 1
+2026-04-08 23:11:57 [main] INFO  c.pwms.report.service.ReportService - Report generated — id: 1 patientId: 1 planId: 1
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Patient 1 notified — report shared
+2026-04-08 23:11:57 [main] INFO  c.pwms.report.service.ReportService - Appointment reminder sent — patientId: 1
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Loading report preview — patientId: 1 planId: 1
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Preview loaded — patient: Ashok plan: Weight Loss completion: 66.67%
+2026-04-08 23:11:57 [main] DEBUG c.pwms.report.service.ReportService - Fetching published reports for patientId: 99
+2026-04-08 23:11:57 [main] WARN  c.pwms.report.service.ReportService - No published reports for patientId: 99

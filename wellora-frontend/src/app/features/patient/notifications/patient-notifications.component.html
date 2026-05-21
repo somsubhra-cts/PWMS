@@ -1,0 +1,61 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>My <span class="gradient-text">Notifications</span></h1>
+      <p>Stay updated on your wellness plan activity</p>
+    </div>
+    @if (unreadCount() > 0) {
+      <button class="btn-ghost" (click)="markAllRead()">
+        <i class="fas fa-check-double"></i> Mark all read
+      </button>
+    }
+  </div>
+
+  <div class="filter-tabs anim-fade-up delay-1">
+    <button class="ftab" [class.active]="filter()==='ALL'" (click)="filter.set('ALL')">
+      All <span class="ftab-count">{{ notifications().length }}</span>
+    </button>
+    <button class="ftab" [class.active]="filter()==='UNREAD'" (click)="filter.set('UNREAD')">
+      Unread <span class="ftab-count unread">{{ unreadCount() }}</span>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="notif-list mt-16">
+      @for (s of [1,2,3,4,5]; track s) {
+        <div class="skeleton" style="height:72px;border-radius:14px;"></div>
+      }
+    </div>
+  } @else if (displayed().length === 0) {
+    <div class="empty-state mt-24">
+      <i class="fas fa-bell empty-icon"></i>
+      <h3>{{ filter()==='UNREAD' ? 'All caught up!' : 'No notifications' }}</h3>
+      <p>{{ filter()==='UNREAD' ? 'No unread notifications at the moment' : 'You have no notifications yet' }}</p>
+    </div>
+  } @else {
+    <div class="notif-list mt-16">
+      @for (n of displayed(); track n.notificationId; let i = $index) {
+        <div class="notif-card anim-fade-up" [class.unread]="!n.isRead"
+             [style.animation-delay]="(i*0.05)+'s'"
+             (click)="markRead(n)">
+          <div class="nc-icon" [style.background]="typeColor(n.notificationType) + '20'" [style.color]="typeColor(n.notificationType)">
+            <i [class]="typeIcon(n.notificationType)"></i>
+          </div>
+          <div class="nc-body">
+            <p class="nc-msg">{{ n.message }}</p>
+            <span class="nc-time text-muted fs-sm">
+              <i class="fas fa-clock"></i> {{ n.createdAt | date:'MMM d, y · h:mm a' }}
+            </span>
+          </div>
+          <div class="nc-right">
+            @if (!n.isRead) {
+              <span class="unread-dot"></span>
+            } @else {
+              <i class="fas fa-check-circle text-success" style="font-size:0.8rem;opacity:0.6;"></i>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

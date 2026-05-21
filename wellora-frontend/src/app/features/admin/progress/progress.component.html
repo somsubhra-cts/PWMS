@@ -1,0 +1,105 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Progress <span class="gradient-text">Viewer</span></h1>
+      <p>Monitor patient activity completion across plans</p>
+    </div>
+  </div>
+
+  <div class="pwms-card filter-card anim-fade-up delay-1">
+    <div class="filter-grid">
+      <div class="form-group">
+        <label>Patient</label>
+        <select class="pwms-input" [value]="selPatient()"
+          (change)="selPatient.set(+$any($event.target).value || null); onPatientChange()">
+          <option value="">— Select patient —</option>
+          @for (p of patients(); track p.patientId) {
+            <option [value]="p.patientId">{{ p.patientName }} (#{{ p.patientId }})</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Wellness Plan (optional)</label>
+        <select class="pwms-input" [value]="selPlan()"
+          (change)="selPlan.set(+$any($event.target).value || null)">
+          <option value="">— All plans —</option>
+          @for (a of assignments(); track a.planId) {
+            <option [value]="a.planId">{{ a.planName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date (optional)</label>
+        <input class="pwms-input" type="date" [value]="selDate()"
+          (change)="selDate.set($any($event.target).value)" />
+      </div>
+      <div class="form-group filter-action">
+        <label>&nbsp;</label>
+        <button class="btn-primary" (click)="search()" [disabled]="loading()">
+          <i class="fas fa-search"></i> View Progress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (summary()) {
+    <div class="pwms-card summary-card anim-scale-in">
+      <div class="summary-ring">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle class="progress-ring-track" cx="55" cy="55" r="45" stroke-width="10"/>
+          <circle class="progress-ring-fill" cx="55" cy="55" r="45" stroke-width="10"
+            [attr.stroke]="summary()!.completionPercentage >= 70 ? '#20c997' : summary()!.completionPercentage >= 40 ? '#ffc107' : '#ef4444'"
+            [attr.stroke-dasharray]="circumference"
+            [attr.stroke-dashoffset]="dashOffset"/>
+        </svg>
+        <div class="ring-label">
+          <span class="ring-pct">{{ summary()!.completionPercentage | number:'1.0-0' }}%</span>
+          <span class="ring-sub">Done</span>
+        </div>
+      </div>
+      <div class="summary-stats">
+        <div class="sstat"><span class="sstat-val">{{ summary()!.totalActivities }}</span><span class="sstat-lbl">Total</span></div>
+        <div class="sstat"><span class="sstat-val text-success">{{ summary()!.completedActivities }}</span><span class="sstat-lbl">Completed</span></div>
+        <div class="sstat"><span class="sstat-val text-warning">{{ summary()!.totalActivities - summary()!.completedActivities }}</span><span class="sstat-lbl">Remaining</span></div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="skeleton" style="height:200px;border-radius:20px;margin-top:20px;"></div>
+  } @else if (records().length > 0) {
+    <div class="pwms-card table-card anim-fade-up">
+      <table class="pwms-table">
+        <thead>
+          <tr>
+            <th>Activity</th>
+            <th>Plan ID</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of records(); track r.progressId; let i = $index) {
+            <tr class="anim-fade-up" [style.animation-delay]="(i*0.04)+'s'">
+              <td><span class="fw-600">{{ r.activityName }}</span></td>
+              <td><span class="id-chip">#{{ r.planId }}</span></td>
+              <td class="text-muted">{{ r.trackedDate }}</td>
+              <td>
+                <span [class]="'chip-' + r.status.toLowerCase()">
+                  <i [class]="r.status==='DONE' ? 'fas fa-check' : r.status==='SKIPPED' ? 'fas fa-forward' : 'fas fa-clock'"></i>
+                  {{ r.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (selPatient()) {
+    <div class="empty-state mt-24">
+      <i class="fas fa-chart-bar empty-icon"></i>
+      <h3>No records found</h3>
+      <p>Try adjusting your filters or select a different date</p>
+    </div>
+  }
+</div>

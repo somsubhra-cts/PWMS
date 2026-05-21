@@ -1,0 +1,270 @@
+package com.pwms.notification.service;
+
+import com.pwms.notification.dto.*;
+import com.pwms.notification.exception.NotificationNotFoundException;
+import com.pwms.notification.interfaces.NotificationIntf;
+import com.pwms.notification.model.Notification;
+import com.pwms.notification.model.Notification.*;
+import com.pwms.notification.repository.NotificationRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationService implements NotificationIntf {
+
+    private final NotificationRepository notifRepo;
+
+    @Override
+    public void notifyNewPatientRegistered(int patientId, int adminId) {
+        log.info("Notifying admin {} — new patient registered: {}",
+                adminId, patientId);
+        save(NotificationRequestDTO.builder()
+                .receiverId(adminId)
+                .receiverType(ReceiverType.ADMIN)
+                .notificationType(NotificationType.NEW_PATIENT_REGISTERED)
+                .patientId(patientId)
+                .build());
+    }
+
+    @Override
+    public void notifyActivityAppreciation(int patientId, int planId,
+                                           String activityName) {
+        log.info("Notifying patient {} — activity appreciation: {}",
+                patientId, activityName);
+        save(NotificationRequestDTO.builder()
+                        .receiverId(patientId)
+                        .receiverType(ReceiverType.PATIENT)
+                        .notificationType(NotificationType.ACTIVITY_APPRECIATION)
+                        .patientId(patientId)
+                        .planId(planId)
+                        .build(),
+                "Great job completing " + activityName + "!");
+    }
+
+    @Override
+    public void notifyActivityReminder(int patientId, int planId,
+                                       String activityName) {
+        log.info("Notifying patient {} — activity reminder: {}",
+                patientId, activityName);
+        save(NotificationRequestDTO.builder()
+                        .receiverId(patientId)
+                        .receiverType(ReceiverType.PATIENT)
+                        .notificationType(NotificationType.ACTIVITY_REMINDER)
+                        .patientId(patientId)
+                        .planId(planId)
+                        .build(),
+                "Reminder: Complete " + activityName + " today!");
+    }
+
+    @Override
+    public void notifyPlanCompleted(int patientId, int planId, int adminId) {
+        log.info("Plan completed — patientId: {} planId: {}",
+                patientId, planId);
+
+        save(NotificationRequestDTO.builder()
+                        .receiverId(patientId)
+                        .receiverType(ReceiverType.PATIENT)
+                        .notificationType(NotificationType.PLAN_COMPLETED)
+                        .patientId(patientId).planId(planId)
+                        .build(),
+                "Congratulations! You have completed your wellness plan.");
+
+        save(NotificationRequestDTO.builder()
+                        .receiverId(adminId)
+                        .receiverType(ReceiverType.ADMIN)
+                        .notificationType(NotificationType.GENERATE_REPORT_REMINDER)
+                        .patientId(patientId).planId(planId)
+                        .build(),
+                "Patient " + patientId +
+                        " has completed their plan. Please generate a report.");
+
+        log.debug("Admin {} notified to generate report for patient {}",
+                adminId, patientId);
+    }
+
+    @Override
+    public void notifyWeeklySummary(int patientId, int planId,
+                                    double completionPct) {
+        log.info("Sending weekly summary to patient {} — {}%",
+                patientId, completionPct);
+        save(NotificationRequestDTO.builder()
+                        .receiverId(patientId)
+                        .receiverType(ReceiverType.PATIENT)
+                        .notificationType(NotificationType.WEEKLY_SUMMARY)
+                        .patientId(patientId).planId(planId)
+                        .build(),
+                "Weekly progress: " + completionPct + "% complete. Keep it up!");
+    }
+
+    @Override
+    public void notifyReportShared(int patientId, int planId) {
+        log.info("Report shared notification — patientId: {}", patientId);
+        save(NotificationRequestDTO.builder()
+                        .receiverId(patientId)
+                        .receiverType(ReceiverType.PATIENT)
+                        .notificationType(NotificationType.REPORT_SHARED)
+                        .patientId(patientId).planId(planId)
+                        .build(),
+                "Your wellness report has been generated by your doctor. " +
+                        "Please review it.");
+    }
+
+    @Override
+    public void notifyPlanAssigned(int patientId, int planId, String planName) {
+        log.info("Notifying patient {} — plan assigned: {}", patientId, planName);
+        save(NotificationRequestDTO.builder()
+                        .receiverId(patientId)
+                        .receiverType(ReceiverType.PATIENT)
+                        .notificationType(NotificationType.PLAN_ASSIGNED)
+                        .patientId(patientId)
+                        .planId(planId)
+                        .build(),
+                "A new wellness plan \"" + planName +
+                        "\" has been assigned to you. Start your activities today!");
+    }
+
+    @Override
+    public void notifyAppointmentReminder(int patientId, int planId) {
+        log.info("Appointment reminder — patientId: {}", patientId);
+        save(NotificationRequestDTO.builder()
+                        .receiverId(patientId)
+                        .receiverType(ReceiverType.PATIENT)
+                        .notificationType(NotificationType.APPOINTMENT_REMINDER)
+                        .patientId(patientId).planId(planId)
+                        .build(),
+                "Your wellness plan is complete. Please book an appointment " +
+                        "with your doctor for further analysis.");
+    }
+
+    @Override
+    public void sendNotification(NotificationRequestDTO request) {
+        log.debug("Generic notification — type: {} receiver: {}",
+                request.getNotificationType(), request.getReceiverId());
+        save(request);
+    }
+
+    @Override
+    public List<NotificationDTO> getNotificationsForPatient(int patientId)
+            throws NotificationNotFoundException {
+        log.debug("Fetching notifications for patientId: {}", patientId);
+        List<Notification> list = notifRepo
+                .findByReceiverIdAndReceiverType(patientId, ReceiverType.PATIENT);
+        if (list.isEmpty()) {
+            log.warn("No notifications found for patientId: {}", patientId);
+            throw new NotificationNotFoundException(
+                    "No notifications found for patientId: " + patientId);
+        }
+        return list.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NotificationDTO> getUnreadForPatient(int patientId)
+            throws NotificationNotFoundException {
+        log.debug("Fetching unread notifications for patientId: {}", patientId);
+        List<Notification> list = notifRepo
+                .findByReceiverIdAndReceiverTypeAndIsRead(
+                        patientId, ReceiverType.PATIENT, false);
+        if (list.isEmpty()) {
+            log.warn("No unread notifications for patientId: {}", patientId);
+            throw new NotificationNotFoundException(
+                    "No unread notifications for patientId: " + patientId);
+        }
+        return list.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NotificationDTO> getNotificationsForAdmin(int adminId)
+            throws NotificationNotFoundException {
+        log.debug("Fetching notifications for adminId: {}", adminId);
+        List<Notification> list = notifRepo
+                .findByReceiverIdAndReceiverType(adminId, ReceiverType.ADMIN);
+        if (list.isEmpty()) {
+            log.warn("No notifications found for adminId: {}", adminId);
+            throw new NotificationNotFoundException(
+                    "No notifications found for adminId: " + adminId);
+        }
+        return list.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NotificationDTO> getUnreadForAdmin(int adminId)
+            throws NotificationNotFoundException {
+        log.debug("Fetching unread notifications for adminId: {}", adminId);
+        List<Notification> list = notifRepo
+                .findByReceiverIdAndReceiverTypeAndIsRead(
+                        adminId, ReceiverType.ADMIN, false);
+        if (list.isEmpty()) {
+            log.warn("No unread notifications for adminId: {}", adminId);
+            throw new NotificationNotFoundException(
+                    "No unread notifications for adminId: " + adminId);
+        }
+        return list.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public NotificationDTO markAsRead(int notificationId)
+            throws NotificationNotFoundException {
+        log.debug("Marking notification {} as read", notificationId);
+        Notification n = notifRepo.findById(notificationId)
+                .orElseThrow(() -> {
+                    log.warn("Notification not found: {}", notificationId);
+                    return new NotificationNotFoundException(
+                            "Notification not found with id: " + notificationId);
+                });
+        n.setRead(true);
+        log.info("Notification {} marked as read", notificationId);
+        return toDTO(notifRepo.save(n));
+    }
+
+    private void save(NotificationRequestDTO req) {
+        save(req, buildMessage(req.getNotificationType(), req.getPatientId()));
+    }
+
+    private void save(NotificationRequestDTO req, String message) {
+        Notification n = new Notification();
+        n.setReceiverId(req.getReceiverId());
+        n.setReceiverType(req.getReceiverType());
+        n.setNotificationType(req.getNotificationType());
+        n.setMessage(message);
+        n.setPatientId(req.getPatientId());
+        n.setPlanId(req.getPlanId());
+        n.setRead(false);
+        notifRepo.save(n);
+        log.debug("Notification saved — type: {} receiver: {}",
+                req.getNotificationType(), req.getReceiverId());
+    }
+
+    private String buildMessage(NotificationType type, Integer patientId) {
+        return switch (type) {
+            case PLAN_ASSIGNED            -> "Wellness Plan has been assigned to You";
+            case NEW_PATIENT_REGISTERED   -> "New patient " + patientId + " registered.";
+            case PLAN_COMPLETED           -> "Wellness plan completed.";
+            case GENERATE_REPORT_REMINDER -> "Please generate report for patient " + patientId + ".";
+            case APPOINTMENT_REMINDER     -> "Please book a doctor appointment.";
+            case REPORT_SHARED            -> "Your wellness report is ready.";
+            case WEEKLY_SUMMARY           -> "Your weekly summary is ready.";
+            case ACTIVITY_REMINDER        -> "You have pending activities today.";
+            case ACTIVITY_APPRECIATION    -> "Great job completing your activity!";
+        };
+    }
+
+    private NotificationDTO toDTO(Notification n) {
+        return NotificationDTO.builder()
+                .notificationId(n.getNotificationId())
+                .receiverId(n.getReceiverId())
+                .receiverType(n.getReceiverType().name())
+                .notificationType(n.getNotificationType().name())
+                .message(n.getMessage())
+                .patientId(n.getPatientId())
+                .planId(n.getPlanId())
+                .isRead(n.isRead())
+                .createdAt(n.getCreatedAt())
+                .build();
+    }
+}
